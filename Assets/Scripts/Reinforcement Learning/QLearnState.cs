@@ -4,19 +4,19 @@ using UnityEngine;
 [Serializable]
 public class QLearnState {
 	
-	public QLearnState() : this(0f, 0f, 0f) {
+	public QLearnState() : this(Vector3.zero, Vector3.zero, Vector3.zero) {
 		
 	}
 
-	public QLearnState(float point1, float point2, float point3) {
-		pointDetect1 = point1.Round2();
-		pointDetect2 = point2.Round2();
-		pointDetect3 = point3.Round2();
+	public QLearnState(Vector3 point1, Vector3 point2, Vector3 point3) {
+		pointDetect1 = point1.ToV3Round2();
+		pointDetect2 = point2.ToV3Round2();
+		pointDetect3 = point3.ToV3Round2();
 	}
 
-	public float pointDetect1 { get; set; }
-	public float pointDetect2 { get; set; }
-	public float pointDetect3 { get; set; }
+	public Vector3 pointDetect1 { get; set; }
+	public Vector3 pointDetect2 { get; set; }
+	public Vector3 pointDetect3 { get; set; }
 
 	public override bool Equals(object rhs) {
 		QLearnState rhState = rhs as QLearnState;

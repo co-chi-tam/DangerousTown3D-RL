@@ -8,6 +8,7 @@ namespace DangerousTown3D {
 	public class CAIController : CResidentController, AI.ReinforcementProblem<QLearnState, QLearnAction>  {
 
 		protected float m_CurrentAxis;
+		protected float m_MaxDistance = 1000f;
 
 		private static QLearning<QLearnState, QLearnAction> algorithm = null;
 		private List<QLearnAction> actions = new List<QLearnAction>();
@@ -35,7 +36,7 @@ namespace DangerousTown3D {
 		}
 
 		private float[] detectRays = new float[] { 0f, -25f, 25f };
-		private float[] detectDistances = new float[] { 0f, 0f, 0f};
+		private Vector3[] detectDistances = new Vector3[] { Vector3.zero, Vector3.zero, Vector3.zero };
 		protected QLearnState State {
 			get {
 				var forward = this.m_Transform.forward;
@@ -46,13 +47,14 @@ namespace DangerousTown3D {
 					RaycastHit rayCastHit;
 					var fixOrigin = this.m_Transform.position + (rayCast.normalized * this.GetRadius ());
 					if (Physics.Raycast (fixOrigin, rayCast, out rayCastHit, distance)) {
-						var direction = rayCastHit.point - this.m_Transform.position;
-						detectDistances [i] = direction.sqrMagnitude;
+						var hitPoint = rayCastHit.point;
+						detectDistances [i] = hitPoint;
 					} else {
-						detectDistances [i] = 0f;
+						detectDistances [i] = origin;
 					}
 #if UNITY_EDITOR
 					Debug.DrawRay (fixOrigin, rayCast, Color.red);
+					Debug.DrawLine (origin, this.GetTarget().GetPosition(), Color.blue);
 #endif
 				}
 				return new QLearnState(detectDistances [0], detectDistances [1], detectDistances [2]);
@@ -61,13 +63,18 @@ namespace DangerousTown3D {
 
 		protected float Reward {
 			get {
-				return (this.IsAlive ? reward.aliveReward : reward.deathReward);
+				var distance = (this.GetTarget().GetPosition() - this.GetPosition()).sqrMagnitude;
+				distance = distance > this.m_MaxDistance ? this.m_MaxDistance : distance;
+				var currentScore = ((this.m_MaxDistance - distance) / this.m_MaxDistance) * reward.aliveReward;
+				return (this.IsAlive 
+					? currentScore 
+					: reward.deathReward);
 			}
 		}
 
-		protected override void Awake ()
+		protected override void Start ()
 		{
-			base.Awake ();
+			base.Start ();
 			this.InitQLearnAlgorithm ();
 		}
 
@@ -121,12 +128,10 @@ namespace DangerousTown3D {
 		}
 
 		public virtual void TurnLeft() {
-			Debug.Log ("TurnLeft");
 			this.TurnObject (-1);
 		}
 
 		public virtual void TurnRight() {
-			Debug.Log ("TurnRight");
 			this.TurnObject (1);
 		}
 

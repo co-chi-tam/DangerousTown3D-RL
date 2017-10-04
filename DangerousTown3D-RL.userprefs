@@ -1,8 +1,12 @@
 ﻿<Properties StartupItem="Assembly-CSharp.csproj">
-  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" PreferredExecutionTarget="Unity.Instance.Unity Editor" />
   <MonoDevelop.Ide.Workbench ActiveDocument="Assets\Scripts\Controllers\CAIController.cs">
     <Files>
-      <File FileName="Assets\Scripts\Controllers\CAIController.cs" Line="1" Column="1" />
+      <File FileName="Assets\Scripts\Controllers\CAIController.cs" Line="39" Column="65" />
+      <File FileName="Assets\Scripts\Reinforcement Learning\QLearnReward.cs" Line="6" Column="31" />
+      <File FileName="Assets\Scripts\Reinforcement Learning\QLearnState.cs" Line="12" Column="31" />
+      <File FileName="Assets\Scripts\Common\Utilities.cs" Line="12" Column="43" />
+      <File FileName="Assets\Scripts\Reinforcement Learning\QLearning.cs" Line="264" Column="53" />
     </Files>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.Breakpoints>

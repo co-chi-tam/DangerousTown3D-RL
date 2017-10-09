@@ -12,8 +12,6 @@ namespace DangerousTown3D {
 			private set { this.m_IsGameOver = value; }
 		}
 
-		public bool IsTeaching = true;
-
 		protected override void Awake ()
 		{
 			base.Awake ();

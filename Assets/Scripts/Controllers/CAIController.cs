@@ -9,13 +9,15 @@ namespace DangerousTown3D {
 
 		protected float m_CurrentAxis;
 		protected float m_MaxDistance = 1000f;
+		protected float m_LifeTimer = 10f;
+		protected bool m_IsCompleted = false;
 
 		private static QLearning<QLearnState, QLearnAction> algorithm = null;
 		private List<QLearnAction> actions = new List<QLearnAction>();
 		private QLearnReward reward = new QLearnReward();
 
 		// Holds a reference to a state in the prior frame of updating
-		protected QLearnState m_State = null;
+		protected static QLearnState m_State = null;
 		// Holds a reference to an action in the prior frame of updating
 		protected QLearnAction m_Action = null;
 
@@ -35,40 +37,29 @@ namespace DangerousTown3D {
 			}
 		}
 
-		private float[] detectRays = new float[] { 0f, -25f, 25f };
-		private Vector3[] detectDistances = new Vector3[] { Vector3.zero, Vector3.zero, Vector3.zero };
 		protected QLearnState State {
 			get {
-				var forward = this.m_Transform.forward;
-				var distance = 2f;
-				var origin = this.GetPosition ();
-				for (int i = 0; i < detectRays.Length; i++) {
-					var rayCast = Quaternion.AngleAxis(detectRays[i], this.m_Transform.up) * forward * distance;
-					RaycastHit rayCastHit;
-					var fixOrigin = this.m_Transform.position + (rayCast.normalized * this.GetRadius ());
-					if (Physics.Raycast (fixOrigin, rayCast, out rayCastHit, distance)) {
-						var hitPoint = rayCastHit.point;
-						detectDistances [i] = hitPoint;
-					} else {
-						detectDistances [i] = origin;
-					}
-#if UNITY_EDITOR
-					Debug.DrawRay (fixOrigin, rayCast, Color.red);
-					Debug.DrawLine (origin, this.GetTarget().GetPosition(), Color.blue);
-#endif
-				}
-				return new QLearnState(detectDistances [0], detectDistances [1], detectDistances [2]);
+				var position = this.GetPosition ();
+				var rotation = this.m_Transform.rotation.eulerAngles;
+				return new QLearnState(
+					position, 
+					rotation
+				);
 			}
 		}
 
 		protected float Reward {
 			get {
-				var distance = (this.GetTarget().GetPosition() - this.GetPosition()).sqrMagnitude;
-				distance = distance > this.m_MaxDistance ? this.m_MaxDistance : distance;
-				var currentScore = ((this.m_MaxDistance - distance) / this.m_MaxDistance) * reward.aliveReward;
-				return (this.IsAlive 
-					? currentScore 
-					: reward.deathReward);
+				if (this.IsAlive) {
+					if (this.m_IsCompleted == false) {
+						var distance = (this.GetTarget ().GetPosition () - this.GetPosition ()).sqrMagnitude;
+						var currentScore = ((this.m_MaxDistance - distance) / this.m_MaxDistance) * reward.aliveReward;
+						return currentScore;
+					} else {
+						return reward.aliveReward;
+					}
+				} 
+				return reward.deathReward;
 			}
 		}
 
@@ -89,24 +80,19 @@ namespace DangerousTown3D {
 
 			if (!CGameManager.Instance.IsGameOver) {
 				QLearningAlgorithm.Update(m_State, m_Action, Reward, State);
-				if (CGameManager.Instance.IsTeaching == false) {
-					m_State = State;
-					m_Action = QLearningAlgorithm.Explore (m_State);
-					m_Action.Action ();
-				} else {
-					if (Input.GetKeyDown (KeyCode.A)) {
-						this.TurnLeft ();
-					}
-					if (Input.GetKeyDown (KeyCode.D)) {
-						this.TurnRight ();
-					}
-				}
+				m_State = State;
+				m_Action = QLearningAlgorithm.Explore (m_State);
+				m_Action.Action ();
 			}
 
 			if (!this.IsAlive) {
 				CGameManager.Instance.TriggerGameOver ();
 			} else {
-				this.MoveForward ();
+				this.IsAlive = m_LifeTimer > 0f;
+			}
+
+			if (this.m_IsCompleted) {
+				CGameManager.Instance.Restart ();
 			}
 		}
 
@@ -115,41 +101,77 @@ namespace DangerousTown3D {
 				algorithm = new QLearning<QLearnState, QLearnAction> ();
 			}
 			algorithm.Problem = this;
-			actions.Add (DoNothingAction);
+			actions.Add (DoMoveForwardAction);
 			actions.Add (DoTurnLeft);
 			actions.Add (DoTurnRight);
-			m_Action = DefaultAction;
+			actions.Add (DoMoveFollow);
+			actions.Add (DoNothingAction);
+			m_Action = DoMoveFollow;
 		}
 
 		protected virtual void OnTriggerEnter(Collider coll) {
 			if (coll.gameObject.tag == "Obstacle") {
 				this.m_IsAlive = false;
 			}
+			if (coll.gameObject.tag == "Point") {
+				this.m_IsCompleted = true;
+			}
 		}
 
 		public virtual void TurnLeft() {
 			this.TurnObject (-1);
+			this.MoveForward ();
 		}
 
 		public virtual void TurnRight() {
 			this.TurnObject (1);
+			this.MoveForward ();
 		}
 
 		public virtual void TurnObject(int turn) {
+			this.m_CurrentAxis = this.m_Transform.rotation.eulerAngles.y;
 			this.m_CurrentAxis += turn * this.m_RotationSpeed;
 			this.m_Transform.rotation = Quaternion.AngleAxis (this.m_CurrentAxis, Vector3.up);
+			m_LifeTimer = 10f;
+		}
+
+		public override void MoveForward ()
+		{
+			base.MoveForward ();
+			m_LifeTimer = 10f;
+		}
+
+		public override void MoveFollow() {
+			var dt = Time.deltaTime;
+			var isNearTarget = this.IsNearTarget ();
+			if (isNearTarget) {
+				this.m_MoveDetailCurve = 0f;
+				return;
+			}
+			var direction = this.m_TargetObject.GetPosition() - this.GetPosition();
+			var target = Quaternion.LookRotation (direction);
+			this.m_Transform.rotation = target;
+
+			this.MoveForward ();
 		}
 
 		public virtual void DoNothing() {
-			// TODO
+			m_LifeTimer -= Time.deltaTime;
 		}
 
-		protected QLearnAction RandomAction {
+		protected QLearnAction DoRandomAction {
 			get {
 				var random = UnityEngine.Random.Range (0, 3);
-				return (random == 0 ? DoNothingAction 
+				return (random == 0 ? DoMoveForwardAction
 						: random == 1 ? DoTurnLeft 
-							: DoTurnRight);
+							: random == 2 ? DoTurnRight  
+								: DoNothingAction);
+			}
+		}
+
+		protected QLearnAction DoMoveFollow {
+			get { 
+				return new QLearnAction ("DoMoveFollow", MoveFollow);
 			}
 		}
 
@@ -162,6 +184,12 @@ namespace DangerousTown3D {
 		protected QLearnAction DoNothingAction {
 			get {
 				return new QLearnAction("DoNothing", DoNothing);
+			}
+		}
+
+		protected QLearnAction DoMoveForwardAction {
+			get {
+				return new QLearnAction("MoveForward", MoveForward);
 			}
 		}
 

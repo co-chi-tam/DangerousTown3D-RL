@@ -34,10 +34,11 @@ namespace DangerousTown3D {
 			base.Update ();
 			if (this.m_TargetObject == null)
 				return;
-			this.MoveFollow (this.m_TargetObject.GetPosition(), Time.deltaTime);
+			this.MoveFollow ();
 		}
 
-		public virtual void MoveFollow(Vector3 position, float dt) {
+		public virtual void MoveFollow() {
+			var dt = Time.deltaTime;
 			var isNearTarget = this.IsNearTarget ();
 			this.SetAnimation ("AnimParam", isNearTarget ? 0 : 1);
 			if (isNearTarget) {

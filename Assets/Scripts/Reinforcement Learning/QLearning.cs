@@ -32,7 +32,7 @@ namespace AI
 		// epsilon
 		[Range(0, 1)]
 		public float explorationRate = 0.0f;
-		
+
 	}
 
 	public interface IQValueStore<State, Action> {
@@ -182,9 +182,9 @@ namespace AI
 			// registered in the store.
 			foreach (QAction action in actions) {
 				// 0 signifies the default value
-				float qValue = 0.0f;
+				float qValue = 0f;
 				store.TryGetValue(new StateActionPair(state, action), out qValue);
-				
+
 				if (best == null || qValue > best.Value.Value) {
 					// Need to create a new object since Key is not modifiable...
 					best = new KeyValuePair<QAction, float>(action, qValue);
@@ -273,20 +273,22 @@ namespace AI
 
 		public QAction Explore(QState state, List<QAction> actions) {
 			QAction action = null;
-
 			// In case the exploration is triggered
-			if (UnityEngine.Random.Range(0.0f, 1.0f) < Properties.explorationRate) {
-				action = actions[UnityEngine.Random.Range(0, actions.Count)];
-			} else {
-				action = store.GetBestAction(state, actions).Key;
+			if (Properties.explorationRate == 0) {
+				action = store.GetBestAction (state, actions).Key;
+			} else if (UnityEngine.Random.Range (0.0f, 1.0f) < Properties.explorationRate) {
+				action = actions [UnityEngine.Random.Range (0, actions.Count)];
 			}
-
 			return action;
 		}
 
 		private float Reinforce(QState state, QAction action, float reward, QState newState, List<QAction> newActions) {
 			float currentQValueForStateAction = store.GetQValue(state, action);
 			float currentBestQValueForNewState = store.GetBestAction(newState, newActions).Value;
+
+//			var value = currentQValueForStateAction + Properties.learningRate 
+//				* (reward + Properties.discountRate * currentBestQValueForNewState - currentQValueForStateAction);
+			
 			var reinforceValue = Mathf.Lerp (currentQValueForStateAction,
 									(reward + (Properties.discountRate * currentBestQValueForNewState)),
 									Properties.learningRate

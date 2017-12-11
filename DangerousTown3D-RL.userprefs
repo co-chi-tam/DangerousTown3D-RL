@@ -1,15 +1,12 @@
 ﻿<Properties StartupItem="Assembly-CSharp.csproj">
-  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
-  <MonoDevelop.Ide.Workbench ActiveDocument="Assets\Scripts\Reinforcement Learning\QLearnAction.cs">
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" PreferredExecutionTarget="Unity.Instance.Unity Editor" />
+  <MonoDevelop.Ide.Workbench ActiveDocument="Assets\Scripts\Controllers\CResidentController.cs">
     <Files>
-      <File FileName="Assets\Scripts\Controllers\CAIController.cs" Line="1" Column="1" />
-      <File FileName="Assets\Scripts\Reinforcement Learning\QLearning.cs" Line="270" Column="1" />
-      <File FileName="Assets\Scripts\Reinforcement Learning\QLearnReward.cs" Line="1" Column="1" />
-      <File FileName="Assets\Scripts\Reinforcement Learning\QLearnState.cs" Line="1" Column="1" />
-      <File FileName="Assets\Scripts\Common\Utilities.cs" Line="1" Column="1" />
-      <File FileName="Assets\Scripts\Controllers\CResidentController.cs" Line="1" Column="1" />
+      <File FileName="Assets\Scripts\Controllers\CPlayerController.cs" Line="1" Column="1" />
+      <File FileName="Assets\Scripts\Controllers\CObjectController.cs" Line="1" Column="1" />
       <File FileName="Assets\Scripts\Manager\CGameManager.cs" Line="1" Column="1" />
-      <File FileName="Assets\Scripts\Reinforcement Learning\QLearnAction.cs" Line="1" Column="1" />
+      <File FileName="Assets\Scripts\Common\CameraSimpleFollower.cs" Line="29" Column="1" />
+      <File FileName="Assets\Scripts\Controllers\CResidentController.cs" Line="14" Column="50" />
     </Files>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.Breakpoints>

@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using SimpleSingleton;
 
 namespace DangerousTown3D {
@@ -29,7 +30,7 @@ namespace DangerousTown3D {
 
 		public void Restart() {
 			this.m_IsGameOver = false;
-			Application.LoadLevel(Application.loadedLevel);
+			SceneManager.LoadScene(SceneManager.GetActiveScene().name);
 		}
 
 	}

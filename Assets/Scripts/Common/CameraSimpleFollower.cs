@@ -26,7 +26,6 @@ namespace SimpleUtil {
 			var targetPosition = target.transform.position + offsetPosition;
 			var direction = targetPosition - m_Transform.position;
 			if (direction.sqrMagnitude < 0.01f) {
-				m_SpeedDetailCurve = 0f;
 				return;
 			}
 			var movePosition = direction.normalized * speed * Time.deltaTime;

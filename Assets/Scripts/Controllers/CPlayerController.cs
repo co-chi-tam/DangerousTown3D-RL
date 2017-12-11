@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 namespace DangerousTown3D {
-public class CPlayerController : MonoBehaviour {
+	public class CPlayerController : CObjectController {
 
 		[SerializeField]	protected GameObject m_Point;
 		[SerializeField]	protected float m_MoveSpeed = 5f;
@@ -12,17 +12,19 @@ public class CPlayerController : MonoBehaviour {
 
 		protected float m_CurrentAxis;
 
-		protected virtual void Awake ()
+		protected override void Awake ()
 		{
+			base.Awake ();
 			Application.targetFrameRate = 60;
 		}
 
-		protected virtual void Update() {
-			#if UNITY_EDITOR
+		protected override void Update() {
+			base.Update ();
+#if UNITY_EDITOR || UNITY_STANDALONE || UNITY_STANDALONE_WIN
 			this.StandaloneSetupPoint(Time.deltaTime);
-			#else
+#else
 			this.MobileSetupPoint (Time.deltaTime);
-			#endif
+#endif
 		}
 
 		public virtual void MobileSetupPoint(float dt) {

@@ -42,7 +42,6 @@ namespace DangerousTown3D {
 			var isNearTarget = this.IsNearTarget ();
 			this.SetAnimation ("AnimParam", isNearTarget ? 0 : 1);
 			if (isNearTarget) {
-				this.m_MoveDetailCurve = 0f;
 				return;
 			}
 			var direction = this.m_TargetObject.GetPosition() - this.GetPosition();
@@ -55,9 +54,10 @@ namespace DangerousTown3D {
 		public virtual void MoveForward() {
 			var dt = Time.deltaTime;
 			var forward = this.m_Transform.forward;
-			var movePosition = forward.normalized * this.m_MoveSpeed * dt;
-			this.m_Transform.position += movePosition * this.m_MoveCurve.Evaluate (this.m_MoveDetailCurve);
-			this.m_MoveDetailCurve += dt * this.m_MoveSpeed;
+			var moveSpeed = this.m_MoveSpeed * this.m_MoveCurve.Evaluate (this.m_MoveDetailCurve);
+			var movePosition = forward.normalized * moveSpeed * dt;
+			this.m_Transform.position += movePosition;
+			this.m_MoveDetailCurve += dt;
 		}
 
 		public virtual void SetAnimation(string name, object param) {

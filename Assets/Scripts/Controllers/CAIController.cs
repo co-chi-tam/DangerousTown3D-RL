@@ -7,11 +7,15 @@ using AI;
 namespace DangerousTown3D {
 	public class CAIController : CResidentController, AI.ReinforcementProblem<QLearnState, QLearnAction>  {
 
+		#region Fields
+
+		// Life cyrcle
 		protected float m_CurrentAxis;
 		protected float m_MaxDistance = 1000f;
 		protected float m_LifeTimer = 10f;
 		protected bool m_IsCompleted = false;
 
+		// Q-Learning
 		private static QLearning<QLearnState, QLearnAction> algorithm = null;
 		private List<QLearnAction> actions = new List<QLearnAction>();
 		private QLearnReward reward = new QLearnReward();
@@ -63,6 +67,10 @@ namespace DangerousTown3D {
 			}
 		}
 
+		#endregion
+
+		#region Implementation Monobehaviour
+
 		protected override void Start ()
 		{
 			base.Start ();
@@ -95,6 +103,10 @@ namespace DangerousTown3D {
 				CGameManager.Instance.Restart ();
 			}
 		}
+
+		#endregion
+
+		#region Implementation Q-Learning
 
 		protected virtual void InitQLearnAlgorithm() {
 			if (algorithm == null) {
@@ -145,7 +157,6 @@ namespace DangerousTown3D {
 			var dt = Time.deltaTime;
 			var isNearTarget = this.IsNearTarget ();
 			if (isNearTarget) {
-				this.m_MoveDetailCurve = 0f;
 				return;
 			}
 			var direction = this.m_TargetObject.GetPosition() - this.GetPosition();
@@ -225,6 +236,8 @@ namespace DangerousTown3D {
 //			 Independent of the state, the same actions are always returned
 			return actions;
 		}
+
+		#endregion
 
 	}
 }
